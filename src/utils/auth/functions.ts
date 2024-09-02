@@ -52,7 +52,7 @@ export async function signup({
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/auth/success");
 }
 
 export async function getUser() {

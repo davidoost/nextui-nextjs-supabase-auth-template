@@ -24,8 +24,12 @@ export default function loginForm() {
     email: "",
     password: "",
   });
+
   // State to store validation error messages
   const [errors, setErrors] = useState<Errors>({});
+
+  // State to store loading status
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Handle changes in input fields
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,20 +40,30 @@ export default function loginForm() {
   };
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent default form submission
+
+    setIsLoading(true); // Set loading state to true when submission starts
 
     // Validate form data using the validation function and schema
     const { errors, data } = validateFormData(loginSchema, formData);
 
     if (errors) {
-      // If there are validation errors, update the errors state
+      // If there are validation errors, update the errors state and stop loading
       setErrors(errors);
+      setIsLoading(false);
     } else {
-      // If validation is successful, clear errors and log the valid data
+      // If validation is successful, clear errors and proceed
       setErrors({});
-      login({ data });
-      // Proceed with form submission logic (e.g., API request)
+      try {
+        await login({ data });
+        // Handle successful login (e.g., redirect or show success message)
+      } catch (error) {
+        // Handle login error (e.g., show error message)
+        console.error("Login failed:", error);
+      } finally {
+        setIsLoading(false); // Reset loading state after submission is done
+      }
     }
   };
 
@@ -81,7 +95,13 @@ export default function loginForm() {
         isInvalid={!!errors.password}
         errorMessage={errors.password}
       />
-      <Button size="lg" color="primary" type="submit">
+      <Button
+        size="lg"
+        color="primary"
+        type="submit"
+        isDisabled={isLoading}
+        isLoading={isLoading}
+      >
         Submit
       </Button>
     </form>
