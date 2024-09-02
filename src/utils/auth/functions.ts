@@ -2,9 +2,28 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import { createClient } from "@/utils/supabase/server";
-import { metadata } from "@/app/layout";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+});
+
+const signupSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+  options: z.object({
+    data: z.object({
+      first_name: z.string().min(1, "First name is required"),
+      last_name: z.string().min(1, "Last name is required"),
+      date_of_birth: z
+        .string()
+        .refine((date) => !isNaN(Date.parse(date)), "Invalid date of birth"),
+    }),
+  }),
+});
 
 export async function login(formData: FormData) {
   const supabase = createClient();
@@ -16,10 +35,22 @@ export async function login(formData: FormData) {
     password: formData.get("password") as string,
   };
 
-  const { error } = await supabase.auth.signInWithPassword(data);
+  const validationResult = loginSchema.safeParse(data);
+
+  if (!validationResult.success) {
+    // Handle validation errors
+    const errorMessages = validationResult.error.errors
+      .map((err) => err.message)
+      .join(", ");
+    return redirect(`/auth?errorMessage=${encodeURIComponent(errorMessages)}`);
+  }
+
+  const { email, password } = validationResult.data;
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    redirect("/error");
+    return redirect(`/auth?errorMessage=${error.message}`);
   }
 
   revalidatePath("/", "layout");
@@ -43,10 +74,24 @@ export async function signup(formData: FormData) {
     },
   };
 
-  const { error } = await supabase.auth.signUp(data);
+  const validationResult = signupSchema.safeParse(data);
+
+  console.log("validationResult: ", JSON.stringify(validationResult, null, 2));
+
+  if (!validationResult.success) {
+    // Handle validation errors
+    const errorMessages = validationResult.error.errors
+      .map((err) => err.message)
+      .join(", ");
+    return redirect(`/auth?errorMessage=${encodeURIComponent(errorMessages)}`);
+  }
+
+  const { email, password, options } = validationResult.data;
+
+  const { error } = await supabase.auth.signUp({ email, password, options });
 
   if (error) {
-    redirect("/error");
+    return redirect(`/auth?errorMessage=${error.message}`);
   }
 
   revalidatePath("/", "layout");
