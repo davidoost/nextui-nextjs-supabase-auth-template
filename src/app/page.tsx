@@ -5,7 +5,7 @@ export default async function Home() {
   const user = await getUser();
   return (
     <Card>
-      <CardBody>Hello {user.email}</CardBody>
+      <CardBody>Hello {user.user_metadata.first_name}</CardBody>
     </Card>
   );
 }

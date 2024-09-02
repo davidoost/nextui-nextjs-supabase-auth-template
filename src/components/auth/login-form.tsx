@@ -1,9 +1,60 @@
-import { login } from "@/utils/auth/functions";
-import { Button, Input } from "@nextui-org/react";
+"use client";
 
-export default function LoginForm() {
+import React, { useState } from "react";
+import { loginSchema } from "@/schemas/login.schema";
+import { validateFormData } from "@/utils/validate-form-data";
+import { Button, Input } from "@nextui-org/react";
+import { login } from "@/utils/auth/functions";
+
+// Define the shape of the form data
+type FormData = {
+  email: string;
+  password: string;
+};
+
+// Define the shape of the error messages
+type Errors = {
+  email?: string;
+  password?: string;
+};
+
+export default function loginForm() {
+  // State to store form data
+  const [formData, setFormData] = useState<FormData>({
+    email: "",
+    password: "",
+  });
+  // State to store validation error messages
+  const [errors, setErrors] = useState<Errors>({});
+
+  // Handle changes in input fields
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value, // Update the relevant field based on the input name
+    });
+  };
+
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Prevent default form submission
+
+    // Validate form data using the validation function and schema
+    const { errors, data } = validateFormData(loginSchema, formData);
+
+    if (errors) {
+      // If there are validation errors, update the errors state
+      setErrors(errors);
+    } else {
+      // If validation is successful, clear errors and log the valid data
+      setErrors({});
+      login({ data });
+      // Proceed with form submission logic (e.g., API request)
+    }
+  };
+
   return (
-    <form className="flex flex-col gap-4">
+    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
       <Input
         isRequired
         variant="bordered"
@@ -12,6 +63,10 @@ export default function LoginForm() {
         type="email"
         label="Email"
         placeholder="Enter your email"
+        value={formData.email}
+        onChange={handleChange}
+        isInvalid={!!errors.email}
+        errorMessage={errors.email}
       />
       <Input
         isRequired
@@ -21,8 +76,12 @@ export default function LoginForm() {
         type="password"
         label="Password"
         placeholder="Enter your password"
+        value={formData.password}
+        onChange={handleChange}
+        isInvalid={!!errors.password}
+        errorMessage={errors.password}
       />
-      <Button size="lg" color="primary" type="submit" formAction={login}>
+      <Button size="lg" color="primary" type="submit">
         Submit
       </Button>
     </form>
