@@ -1,29 +1,25 @@
 "use client";
 
 import React, { useState } from "react";
-import { loginSchema } from "@/schemas/login.schema";
+import { forgotPasswordSchema } from "@/schemas/forgot.password.schema";
 import { validateFormData } from "@/utils/validate-form-data";
-import { Button, Checkbox, Input, Link } from "@nextui-org/react";
-import { login } from "@/functions/auth/login";
-import { Icon } from "@iconify/react";
+import { Button, Input } from "@nextui-org/react";
+import { forgotPassword } from "@/functions/auth/forgot-password";
 
 // Define the shape of the form data
 type FormData = {
   email: string;
-  password: string;
 };
 
 // Define the shape of the error messages
 type Errors = {
   email?: string;
-  password?: string;
 };
 
-export default function LoginForm() {
+export default function ForgotPasswordForm() {
   // State to store form data
   const [formData, setFormData] = useState<FormData>({
     email: "",
-    password: "",
   });
 
   // State to store validation error messages
@@ -31,11 +27,6 @@ export default function LoginForm() {
 
   // State to store loading status
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  // State to store password visibility
-  const [isVisible, setIsVisible] = useState<boolean>(false);
-
-  const toggleVisibility = () => setIsVisible(!isVisible);
 
   // Handle changes in input fields
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +43,7 @@ export default function LoginForm() {
     setIsLoading(true); // Set loading state to true when submission starts
 
     // Validate form data using the validation function and schema
-    const { errors, data } = validateFormData(loginSchema, formData);
+    const { errors, data } = validateFormData(forgotPasswordSchema, formData);
 
     if (errors) {
       // If there are validation errors, update the errors state and stop loading
@@ -62,7 +53,8 @@ export default function LoginForm() {
       // If validation is successful, clear errors and proceed
       setErrors({});
       try {
-        await login({ data });
+        const email = await data.email;
+        await forgotPassword(email);
         // Handle successful login (e.g., redirect or show success message)
       } catch (error) {
         // Handle login error (e.g., show error message)
@@ -88,46 +80,6 @@ export default function LoginForm() {
         isInvalid={!!errors.email}
         errorMessage={errors.email}
       />
-      <Input
-        endContent={
-          <button type="button" onClick={toggleVisibility}>
-            {isVisible ? (
-              <Icon
-                className="pointer-events-none text-2xl text-default-400"
-                icon="solar:eye-closed-linear"
-              />
-            ) : (
-              <Icon
-                className="pointer-events-none text-2xl text-default-400"
-                icon="solar:eye-bold"
-              />
-            )}
-          </button>
-        }
-        variant="bordered"
-        id="password"
-        name="password"
-        type={isVisible ? "text" : "password"}
-        label="Password"
-        labelPlacement="outside"
-        placeholder="Enter your password"
-        value={formData.password}
-        onChange={handleChange}
-        isInvalid={!!errors.password}
-        errorMessage={errors.password}
-      />
-      <div className="flex items-center justify-between px-1 py-2">
-        <Checkbox name="remember" size="sm">
-          Remember me
-        </Checkbox>
-        <Link
-          className="text-default-500"
-          href="/auth/forgot-password"
-          size="sm"
-        >
-          Forgot password?
-        </Link>
-      </div>
       <Button
         size="md"
         color="primary"
@@ -135,7 +87,7 @@ export default function LoginForm() {
         isDisabled={isLoading}
         isLoading={isLoading}
       >
-        Submit
+        Reset Password
       </Button>
     </form>
   );

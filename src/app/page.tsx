@@ -1,11 +1,16 @@
-import { getUser } from "@/utils/auth/functions";
+import { createClient } from "@/utils/supabase/server";
 import { Card, CardBody } from "@nextui-org/react";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
-  const user = await getUser();
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) {
+    redirect("/login");
+  }
   return (
     <Card>
-      <CardBody>Hello {user.user_metadata.first_name}</CardBody>
+      <CardBody>Hello {data.user.email}</CardBody>
     </Card>
   );
 }

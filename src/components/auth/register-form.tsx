@@ -3,8 +3,9 @@
 import React, { useState } from "react";
 import { validateFormData } from "@/utils/validate-form-data";
 import { Button, Input } from "@nextui-org/react";
-import { signup } from "@/utils/auth/functions";
-import { signupSchema } from "@/schemas/signup.schema";
+import { register } from "@/functions/auth/register";
+import { registerSchema } from "@/schemas/register.schema";
+import { Icon } from "@iconify/react";
 
 // Define the shape of the form data
 type FormData = {
@@ -13,6 +14,7 @@ type FormData = {
   confirmPassword: string;
   firstName: string;
   lastName: string;
+  userName: string;
 };
 
 // Define the shape of the error messages
@@ -22,9 +24,10 @@ type Errors = {
   confirmPassword?: string;
   firstName?: string;
   lastName?: string;
+  userName?: string;
 };
 
-export default function signupForm() {
+export default function RegisterForm() {
   // State to store form data
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -32,6 +35,7 @@ export default function signupForm() {
     confirmPassword: "",
     firstName: "",
     lastName: "",
+    userName: "",
   });
 
   // State to store validation error messages
@@ -39,6 +43,11 @@ export default function signupForm() {
 
   // State to store loading status
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // State to store password visibility
+  const [isVisible, setIsVisible] = useState<boolean>(false);
+
+  const toggleVisibility = () => setIsVisible(!isVisible);
 
   // Handle changes in input fields
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +64,7 @@ export default function signupForm() {
     setIsLoading(true); // Set loading state to true when submission starts
 
     // Validate form data using the validation function and schema
-    const { errors, data } = validateFormData(signupSchema, formData);
+    const { errors, data } = validateFormData(registerSchema, formData);
 
     if (errors) {
       // If there are validation errors, update the errors state and stop loading
@@ -65,7 +74,7 @@ export default function signupForm() {
       // If validation is successful, clear errors and proceed
       setErrors({});
       try {
-        await signup({ data });
+        await register({ data });
         // Handle successful login (e.g., redirect or show success message)
       } catch (error) {
         // Handle login error (e.g., show error message)
@@ -79,12 +88,12 @@ export default function signupForm() {
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
       <Input
-        isRequired
         variant="bordered"
         id="email"
         name="email"
         type="email"
         label="Email"
+        labelPlacement="outside"
         placeholder="Enter your email"
         value={formData.email}
         onChange={handleChange}
@@ -92,12 +101,27 @@ export default function signupForm() {
         errorMessage={errors.email}
       />
       <Input
-        isRequired
+        endContent={
+          <button type="button" onClick={toggleVisibility}>
+            {isVisible ? (
+              <Icon
+                className="pointer-events-none text-2xl text-default-400"
+                icon="solar:eye-closed-linear"
+              />
+            ) : (
+              <Icon
+                className="pointer-events-none text-2xl text-default-400"
+                icon="solar:eye-bold"
+              />
+            )}
+          </button>
+        }
         variant="bordered"
         id="password"
         name="password"
-        type="password"
+        type={isVisible ? "text" : "password"}
         label="Password"
+        labelPlacement="outside"
         placeholder="Enter your password"
         value={formData.password}
         onChange={handleChange}
@@ -105,48 +129,35 @@ export default function signupForm() {
         errorMessage={errors.password}
       />
       <Input
-        isRequired
+        endContent={
+          <button type="button" onClick={toggleVisibility}>
+            {isVisible ? (
+              <Icon
+                className="pointer-events-none text-2xl text-default-400"
+                icon="solar:eye-closed-linear"
+              />
+            ) : (
+              <Icon
+                className="pointer-events-none text-2xl text-default-400"
+                icon="solar:eye-bold"
+              />
+            )}
+          </button>
+        }
         variant="bordered"
         id="confirm_password"
         name="confirmPassword"
-        type="password"
+        type={isVisible ? "text" : "password"}
         label="Confirm Password"
+        labelPlacement="outside"
         placeholder="Confirm your password"
         value={formData.confirmPassword}
         onChange={handleChange}
         isInvalid={!!errors.confirmPassword}
         errorMessage={errors.confirmPassword}
       />
-      <div className="flex gap-4">
-        <Input
-          isRequired
-          variant="bordered"
-          id="first_name"
-          name="firstName"
-          type="first_name"
-          label="First Name"
-          placeholder="Enter your first name"
-          value={formData.firstName}
-          onChange={handleChange}
-          isInvalid={!!errors.firstName}
-          errorMessage={errors.firstName}
-        />
-        <Input
-          isRequired
-          variant="bordered"
-          id="last_name"
-          name="lastName"
-          type="last_name"
-          label="Last Name"
-          placeholder="Enter your last name"
-          value={formData.lastName}
-          onChange={handleChange}
-          isInvalid={!!errors.lastName}
-          errorMessage={errors.lastName}
-        />
-      </div>
       <Button
-        size="lg"
+        size="md"
         color="primary"
         type="submit"
         isDisabled={isLoading}

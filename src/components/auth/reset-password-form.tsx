@@ -1,29 +1,29 @@
 "use client";
 
 import React, { useState } from "react";
-import { loginSchema } from "@/schemas/login.schema";
+import { resetPasswordSchema } from "@/schemas/reset.password.schema";
 import { validateFormData } from "@/utils/validate-form-data";
-import { Button, Checkbox, Input, Link } from "@nextui-org/react";
-import { login } from "@/functions/auth/login";
+import { Button, Input } from "@nextui-org/react";
+import { resetPassword } from "@/functions/auth/reset-password";
 import { Icon } from "@iconify/react";
 
 // Define the shape of the form data
 type FormData = {
-  email: string;
   password: string;
+  confirmPassword: string;
 };
 
 // Define the shape of the error messages
 type Errors = {
-  email?: string;
   password?: string;
+  confirmPassword?: string;
 };
 
-export default function LoginForm() {
+export default function ResetPasswordForm() {
   // State to store form data
   const [formData, setFormData] = useState<FormData>({
-    email: "",
     password: "",
+    confirmPassword: "",
   });
 
   // State to store validation error messages
@@ -52,7 +52,7 @@ export default function LoginForm() {
     setIsLoading(true); // Set loading state to true when submission starts
 
     // Validate form data using the validation function and schema
-    const { errors, data } = validateFormData(loginSchema, formData);
+    const { errors, data } = validateFormData(resetPasswordSchema, formData);
 
     if (errors) {
       // If there are validation errors, update the errors state and stop loading
@@ -62,7 +62,7 @@ export default function LoginForm() {
       // If validation is successful, clear errors and proceed
       setErrors({});
       try {
-        await login({ data });
+        await resetPassword(data.password);
         // Handle successful login (e.g., redirect or show success message)
       } catch (error) {
         // Handle login error (e.g., show error message)
@@ -76,17 +76,33 @@ export default function LoginForm() {
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
       <Input
+        endContent={
+          <button type="button" onClick={toggleVisibility}>
+            {isVisible ? (
+              <Icon
+                className="pointer-events-none text-2xl text-default-400"
+                icon="solar:eye-closed-linear"
+              />
+            ) : (
+              <Icon
+                className="pointer-events-none text-2xl text-default-400"
+                icon="solar:eye-bold"
+              />
+            )}
+          </button>
+        }
+        isRequired
         variant="bordered"
-        id="email"
-        name="email"
-        type="email"
-        label="Email"
+        id="password"
+        name="password"
+        type={isVisible ? "text" : "password"}
+        label="Password"
         labelPlacement="outside"
-        placeholder="Enter your email"
-        value={formData.email}
+        placeholder="Enter your password"
+        value={formData.password}
         onChange={handleChange}
-        isInvalid={!!errors.email}
-        errorMessage={errors.email}
+        isInvalid={!!errors.password}
+        errorMessage={errors.password}
       />
       <Input
         endContent={
@@ -104,30 +120,19 @@ export default function LoginForm() {
             )}
           </button>
         }
+        isRequired
         variant="bordered"
-        id="password"
-        name="password"
+        id="confirm_password"
+        name="confirmPassword"
         type={isVisible ? "text" : "password"}
-        label="Password"
+        label="Confirm Password"
         labelPlacement="outside"
-        placeholder="Enter your password"
-        value={formData.password}
+        placeholder="Confirm your password"
+        value={formData.confirmPassword}
         onChange={handleChange}
-        isInvalid={!!errors.password}
-        errorMessage={errors.password}
+        isInvalid={!!errors.confirmPassword}
+        errorMessage={errors.confirmPassword}
       />
-      <div className="flex items-center justify-between px-1 py-2">
-        <Checkbox name="remember" size="sm">
-          Remember me
-        </Checkbox>
-        <Link
-          className="text-default-500"
-          href="/auth/forgot-password"
-          size="sm"
-        >
-          Forgot password?
-        </Link>
-      </div>
       <Button
         size="md"
         color="primary"
@@ -135,7 +140,7 @@ export default function LoginForm() {
         isDisabled={isLoading}
         isLoading={isLoading}
       >
-        Submit
+        Reset Password
       </Button>
     </form>
   );
