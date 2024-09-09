@@ -1,3 +1,5 @@
+"use client";
+
 import SearchParamsCallout from "@/components/search-params-callout";
 import { Card } from "@nextui-org/react";
 import { Suspense } from "react";
