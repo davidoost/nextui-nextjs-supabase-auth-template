@@ -1,7 +1,9 @@
 "use client";
 
+import SearchParamsCallout from "@/components/search-params-callout";
 import { Card } from "@nextui-org/react";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 export default function ErrorPage() {
   const searchParams = useSearchParams();
@@ -15,11 +17,9 @@ export default function ErrorPage() {
         </span>
       </p>
       <p>Something went wrong...</p>
-      {message && (
-        <Card className="p-2 px-4 text-danger bg-danger-100 border border-danger">
-          {decodeURIComponent(message)}
-        </Card>
-      )}
+      <Suspense>
+        <SearchParamsCallout variant="danger" />
+      </Suspense>
     </Card>
   );
 }
