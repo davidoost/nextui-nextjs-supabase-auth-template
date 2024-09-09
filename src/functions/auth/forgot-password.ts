@@ -13,14 +13,16 @@ export async function forgotPassword(email: string) {
 
   const baseUrl = `${protocol}://${host}`;
 
-  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${baseUrl}/auth/reset-password`,
-  });
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email);
 
   if (error) {
-    return redirect(`/auth/forgot-password?error=${error.message}`);
+    return redirect(`/auth/error?message=${error.message}`);
   }
 
   revalidatePath("/", "layout");
-  redirect("/auth/forgot-password/success");
+  return redirect(
+    `/auth/success?message=${encodeURIComponent(
+      "You have successfully requested a password reset. You will receive an email containing a link to reset your password."
+    )}`
+  );
 }

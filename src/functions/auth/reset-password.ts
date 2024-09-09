@@ -12,9 +12,13 @@ export async function resetPassword(password: string) {
   });
 
   if (error) {
-    return redirect(`/auth/reset-password?error=${error.message}`);
+    return redirect(`/auth/error?message=${error.message}`);
   }
 
   revalidatePath("/", "layout");
-  redirect("/auth/reset-password/success");
+  redirect(
+    `/auth/success?message=${encodeURIComponent(
+      "You have successfully reset your password. You can now log in using your new password."
+    )}`
+  );
 }

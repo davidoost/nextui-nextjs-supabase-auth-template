@@ -20,9 +20,13 @@ export async function register({
   });
 
   if (error) {
-    return redirect(`/auth/register?error=${error.message}`);
+    return redirect(`/auth/error?message=${error.message}`);
   }
 
   revalidatePath("/", "layout");
-  redirect("/auth/register/success");
+  redirect(
+    `/auth/success?message=${encodeURIComponent(
+      "You have successfully signed up. You will receive an email with a link to confirm your email address."
+    )}`
+  );
 }
