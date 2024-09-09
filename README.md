@@ -46,13 +46,25 @@ Modify the email templates to include custom URLs for signup and password recove
 
 Go to **Authentication > Email Templates**. In the **Confirm Signup** template, update the URL:
 
-`"{{ .ConfirmationURL }}"` > `"{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup"`
+```
+"{{ .ConfirmationURL }}"
+
+to:
+
+"{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup"
+```
 
 ### 5.2 Reset Password Template
 
 In the **Reset Password** template, update the URL:
 
-`"{{ .ConfirmationURL }}"` > `"{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/auth/reset-password"`
+```
+"{{ .ConfirmationURL }}"
+
+to:
+
+"{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/auth/reset-password"
+```
 
 ## You're all set!
 
